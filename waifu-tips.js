@@ -3,48 +3,12 @@
  * https://www.fghrsh.net/post/123.html
  */
 
-function initWidget(waifuPath, apiPath) {
-	if (screen.width <= 768 || (localStorage.getItem("waifu-display") && new Date().getTime() - localStorage.getItem("waifu-display") <= 86400000)) return;
+function initWidget(waifuPath) {
+	if (screen.width <= 768) return;
 	localStorage.removeItem("waifu-display");
 	sessionStorage.removeItem("waifu-text");
-	$("body").append(`<div id="waifu">
-			<div id="waifu-tips"></div>
-			<canvas id="live2d" width="300" height="300"></canvas>
-			<div id="waifu-tool">
-				<span class="fa fa-lg fa-comment"></span>
-				<span class="fa fa-lg fa-paper-plane"></span>
-				<span class="fa fa-lg fa-user-circle"></span>
-				<span class="fa fa-lg fa-street-view"></span>
-				<span class="fa fa-lg fa-camera-retro"></span>
-				<span class="fa fa-lg fa-info-circle"></span>
-				<span class="fa fa-lg fa-times"></span>
-			</div>
-		</div>`);
-	$("#waifu-tool .fa-comment").click(showHitokoto);
-	$("#waifu-tool .fa-paper-plane").click(function() {
-		var s = document.createElement("script");
-		document.body.appendChild(s);
-		s.src = "https://galaxymimi.com/js/asteroids.js";
-	});
-	$("#waifu-tool .fa-user-circle").click(loadOtherModel);
-	$("#waifu-tool .fa-street-view").click(loadRandModel);
-	$("#waifu-tool .fa-camera-retro").click(function() {
-		showMessage("照好了嘛，是不是很可爱呢？", 6000, 9);
-		window.Live2D.captureName = "photo.png";
-		window.Live2D.captureFrame = true;
-	});
-	$("#waifu-tool .fa-info-circle").click(function() {
-		window.open("https://github.com/stevenjoezhang/live2d-widget");
-	});
-	$("#waifu-tool .fa-times").click(function() {
-		localStorage.setItem("waifu-display", new Date().getTime());
-		showMessage("愿你有一天能与重要的人重逢。", 2000, 11);
-		$("#waifu").animate({ bottom: -500 }, 3000, function() {
-			$("#waifu").hide();
-		});
-	});
+	$("body").append(`<div id="waifu-tips"></div>`);
 	var re = /x/;
-	console.log(re);
 	re.toString = function() {
 		showMessage("哈哈，你打开了控制台，是想要看看我的秘密吗？", 6000, 9);
 		return "";
@@ -62,8 +26,8 @@ function initWidget(waifuPath, apiPath) {
 			if (now > 23 || now <= 5) text = "你是夜猫子呀？这么晚还不睡觉，明天起的来嘛？";
 			else if (now > 5 && now <= 7) text = "早上好！一日之计在于晨，美好的一天就要开始了。";
 			else if (now > 7 && now <= 11) text = "上午好！工作顺利嘛，不要久坐，多起来走动走动哦！";
-			else if (now > 11 && now <= 14) text = "中午了，工作了一个上午，现在是午餐时间！";
-			else if (now > 14 && now <= 17) text = "午后很容易犯困呢，今天的运动目标完成了吗？";
+			else if (now > 11 && now <= 13) text = "中午了，工作了一个上午，现在是午餐时间！";
+			else if (now > 13 && now <= 17) text = "午后很容易犯困呢，今天的运动目标完成了吗？";
 			else if (now > 17 && now <= 19) text = "傍晚了！窗外夕阳的景色很美丽呢，最美不过夕阳红～";
 			else if (now > 19 && now <= 21) text = "晚上好，今天过得怎么样？";
 			else if (now > 21 && now <= 23) text = ["已经这么晚了呀，早点休息吧，晚安～", "深夜时要爱护眼睛呀！"];
@@ -94,29 +58,6 @@ function initWidget(waifuPath, apiPath) {
 	}).keydown(function() {
 		userAction = true;
 	});
-	setInterval(function() {
-		if (!userAction) {
-			if (!hitokotoTimer) hitokotoTimer = setInterval(showHitokoto, 25000);
-		}
-		else {
-			userAction = false;
-			clearInterval(hitokotoTimer);
-			hitokotoTimer = null;
-		}
-	}, 1000);
-
-	function showHitokoto() {
-		//增加 hitokoto.cn 的 API
-		if (Math.random() < 0.6 && messageArray.length > 0) showMessage(messageArray[Math.floor(Math.random() * messageArray.length)], 6000, 9);
-		else $.getJSON("https://v1.hitokoto.cn", function(result) {
-				var text = `这句一言来自 <span style="color:#0099cc;">『${result.from}』</span>，是 <span style="color:#0099cc;">${result.creator}</span> 在 hitokoto.cn 投稿的。`;
-			showMessage(result.hitokoto, 6000, 9);
-			setTimeout(function() {
-				showMessage(text, 4000, 9);
-			}, 6000);
-		});
-	}
-
 	function showMessage(text, timeout, priority) {
 		//console.log(text, timeout, priority);
 		if (!text) return;
@@ -135,18 +76,8 @@ function initWidget(waifuPath, apiPath) {
 			}, timeout);
 		}
 	}
-
 	function initModel() {
 		waifuPath = waifuPath || "/waifu-tips.json";
-		apiURL = apiPath || "";
-		var modelId = localStorage.getItem("modelId"),
-			modelTexturesId = localStorage.getItem("modelTexturesId");
-		if (modelId == null) {
-			//首次访问加载 指定模型 的 指定材质
-			var modelId = 1, //模型 ID
-				modelTexturesId = 53; //材质 ID
-		}
-		loadModel(modelId, modelTexturesId);
 		$.getJSON(waifuPath, function(result) {
 			$.each(result.mouseover, function(index, tips) {
 				$(document).on("mouseover", tips.selector, function() {
@@ -173,42 +104,6 @@ function initWidget(waifuPath, apiPath) {
 					messageArray.push(text);
 				}
 			});
-		});
-	}
-
-	function loadModel(modelId, modelTexturesId) {
-		localStorage.setItem("modelId", modelId);
-		if (modelTexturesId === undefined) modelTexturesId = 0;
-		localStorage.setItem("modelTexturesId", modelTexturesId);
-		loadlive2d("live2d", `${apiURL}/get/?id=${modelId}-${modelTexturesId}`, console.log("live2d", `模型 ${modelId}-${modelTexturesId} 加载完成`));
-	}
-
-	function loadRandModel() {
-		var modelId = localStorage.getItem("modelId"),
-			modelTexturesId = localStorage.getItem("modelTexturesId");
-			//可选 "rand"(随机), "switch"(顺序)
-		$.ajax({
-			cache: false,
-			url: `${apiURL}/rand_textures/?id=${modelId}-${modelTexturesId}`,
-			dataType: "json",
-			success: function(result) {
-				if (result.textures["id"] == 1 && (modelTexturesId == 1 || modelTexturesId == 0)) showMessage("我还没有其他衣服呢！", 4000, 10);
-				else showMessage("我的新衣服好看嘛？", 4000, 10);
-				loadModel(modelId, result.textures["id"]);
-			}
-		});
-	}
-
-	function loadOtherModel() {
-		var modelId = localStorage.getItem("modelId");
-		$.ajax({
-			cache: false,
-			url: `${apiURL}/switch/?id=${modelId}`,
-			dataType: "json",
-			success: function(result) {
-				loadModel(result.model["id"]);
-				showMessage(result.model["message"], 4000, 10);
-			}
 		});
 	}
 	initModel();

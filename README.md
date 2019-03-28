@@ -110,3 +110,19 @@ http://www.gnu.org/licenses/gpl-3.0.html
 ## 更新 Update
 2018年10月31日，由fghrsh提供的原API停用，请更新至新地址。参考文章：  
 https://www.fghrsh.net/post/170.html
+
+----
+## 更新 Update by Hazurt
+去除后端api支持，模型渲染由hexo-helper-live2d负责。
+
+#### 使用 Usage
+在Next主题文件`_layout.swing`在`<head>`中加入：
+```
+<script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css"/>
+<script src="/live2dw/autoload.js"></script>
+```
+将`autoload.js`、`live2d.min.js`、`waifu.css`、`waifu-tips.js`、`waifu-tips.json`放入hexo-helper-live2d的模型文件夹`live2d_models\xxx\`，修改`waifu.css`使对话位置与模型匹配。
+
+#### 示例 Demo
+在[我的github page](https://www.hazurt.com)的右下角可查看效果。
